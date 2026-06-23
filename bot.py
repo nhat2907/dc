@@ -10,7 +10,7 @@ from logger.logging import print_log, Colors
 from handler.voice import connect_voice, handle_voice_state_update
 from handler.autoquest import run_auto_quest
 from handler.giveaway import process_giveaway
-from handler.streamRPC import start_rpc
+from handler.streamRPC import start_rpc   # <--- Đảm bảo import này
 
 os.system('')
 logging.getLogger('discord').setLevel(logging.CRITICAL)
@@ -36,11 +36,8 @@ class SelfBot(discord.Client):
         self.rpc_index = -1
         self.asset_cache = {}
         self.start_time = int(time.time())
-
         self.joined_giveaways = set()
-
-        rpc_cfg = self.config.get("rpc_config", {})
-        self.loop_delay = rpc_cfg.get("delay", 5)
+        self.loop_delay = config.get("rpc_config", {}).get("delay", 5)
 
     async def on_message(self, message):
         await process_giveaway(self, message)
@@ -57,22 +54,17 @@ class SelfBot(discord.Client):
         sys.stdout.flush()
 
         print_log(f"[</>] Connected | {self.user.display_name}\n\n", Colors.cyan_to_blue, interval=0.05)
-        print_log("Welcome to Discord Self Bot , MNhat.\n\n", Colors.cyan_to_blue, interval=0.05)
+        print_log("Welcome to Discord Self Bot\n\n", Colors.cyan_to_blue, interval=0.05)
 
-        rpc_data = self.config.get("rpc_config", {}).get("data", [])
-        rpc_count = len(rpc_data) if isinstance(rpc_data, list) else 0
-        status_data = self.config.get("custom_status", {}).get("data", [])
-        status_count = len(status_data) if isinstance(status_data, list) else 0
+        rpc_count = len(self.config.get("rpc_config", {}).get("data", []))
+        status_count = len(self.config.get("custom_status", {}).get("data", []))
 
         print_log(f"[</>] RPCs      : {rpc_count} loaded\n", Colors.green_to_cyan, interval=0.03)
         print_log(f"[</>] Statuses  : {status_count} loaded\n", Colors.green_to_cyan, interval=0.03)
         print_log(f"[</>] Loop Delay: {self.loop_delay}s\n\n", Colors.green_to_cyan, interval=0.03)
 
-        if not hasattr(self, 'status_changer_started'):
-            self.status_changer_started = True
-            asyncio.create_task(start_rpc(self))
-            asyncio.create_task(run_auto_quest(self))
-
+        asyncio.create_task(start_rpc(self))
+        asyncio.create_task(run_auto_quest(self))
         asyncio.create_task(connect_voice(self))
 
 
@@ -88,17 +80,10 @@ def main():
 
     client = SelfBot(config)
     try:
-        try:
-            client.run(token, log_handler=None)
-        except TypeError:
-            client.run(token)
+        client.run(token, log_handler=None)
     except discord.LoginFailure:
-        sys.stdout.write('\r' + ' ' * 50 + '\r')
-        sys.stdout.flush()
         print_log("[</>] Error : Invalid token\n", Colors.red_to_yellow, interval=0.05)
     except Exception as e:
-        sys.stdout.write('\r' + ' ' * 50 + '\r')
-        sys.stdout.flush()
         print_log(f"[</>] Error : {e}\n", Colors.red_to_yellow, interval=0.05)
 
 
