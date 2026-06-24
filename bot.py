@@ -57,7 +57,7 @@ class SelfBot(discord.Client):
         sys.stdout.flush()
 
         print_log(f"[</>] Connected | {self.user.display_name}\n\n", Colors.cyan_to_blue, interval=0.05)
-        print_log("Welcome to Discord Self Bot , MNhat.\n\n", Colors.cyan_to_blue, interval=0.05)
+        print_log("Welcome to Discord Self Bot , made by Tuan Haii - w love\n\n", Colors.cyan_to_blue, interval=0.05)
 
         rpc_data = self.config.get("rpc_config", {}).get("data", [])
         rpc_count = len(rpc_data) if isinstance(rpc_data, list) else 0
